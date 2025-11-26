@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: TestReactive
+  mongodb:
+    host: localhost:27168
+    username: istad
+    password: qwerqwer
+    database: darareactive
+    authentication-database: admin
+
