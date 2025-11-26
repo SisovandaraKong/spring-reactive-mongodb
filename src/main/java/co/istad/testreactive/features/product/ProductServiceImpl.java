@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.UUID;
 
 @Service
@@ -34,11 +35,38 @@ public class ProductServiceImpl implements ProductService{
         product.setName(productRequest.name());
         product.setDescription(productRequest.description());
         product.setIsDeleted(false);
-        return productRepository.save(product)  // Returns Mono<Product>
+        return productRepository.save(product)
                 .map(savedProduct -> new ProductResponse(
                         savedProduct.getUuid(),
                         savedProduct.getName(),
                         savedProduct.getDescription()
                 ));
     }
+    @Override
+    public Flux<ProductResponse> streamProducts() {
+        return productRepository.findAll()
+                .filter(product -> !product.getIsDeleted())
+                .map(product -> new ProductResponse(
+                        product.getUuid(),
+                        product.getName(),
+                        product.getDescription()
+                ))
+                .delayElements(Duration.ofSeconds(1)); // Send one product every 1second
+        // Auto close the stream when all products are sent
+    }
+
+    @Override
+    public Flux<ProductResponse> streamProductsRealtime() {
+        return Flux.interval(Duration.ofSeconds(2))
+                .flatMap(tick -> {
+                    return productRepository.findAll()
+                            .filter(product -> !product.getIsDeleted())
+                            .map(product -> new ProductResponse(
+                                    product.getUuid(),
+                                    product.getName(),
+                                    product.getDescription()
+                            ));
+                });
+    }
+
 }

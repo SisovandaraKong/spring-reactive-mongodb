@@ -4,12 +4,10 @@ import co.istad.testreactive.features.product.dto.ProductRequest;
 import co.istad.testreactive.features.product.dto.ProductResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,4 +26,17 @@ public class ProductController {
     public Mono<ProductResponse> createProduct(@RequestBody ProductRequest productRequest) {
         return productService.createProduct(productRequest);
     }
+
+    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<ProductResponse> streamProducts() {
+        return productService.streamProducts();
+    }
+
+    @GetMapping(value = "/stream-realtime", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<ProductResponse> streamProductsRealtime() {
+        return productService.streamProductsRealtime();
+    }
+
 }
